@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
   :root{
     --bg:#241811;
@@ -480,40 +481,51 @@
 </div>
 
 <script>
-/* ---------------- Menu data ---------------- */
-const MENU = [
+/* ---------------- Menu data (loaded from menu.csv) ---------------- */
+let MENU = [];
+let ITEM_INDEX = {};
+
+const FALLBACK_MENU = [
   { cat: "Starters", sub: "small plates to open the table", items: [
     { id:"s1", name:"Charred Sourdough & Whipped Ricotta", desc:"Rosemary oil, sea salt, honey drizzle", price:9 },
-    { id:"s2", name:"Blistered Shishito Peppers", desc:"Lemon aioli, flaky salt", price:8 },
-    { id:"s3", name:"Smoked Mushroom Toast", desc:"Thyme, shaved parmesan", price:11 },
-    { id:"s4", name:"Roasted Beet & Burrata", desc:"Candied walnuts, balsamic reduction", price:12 },
-  ]},
-  { cat: "Mains", sub: "from the hearth", items: [
-    { id:"m1", name:"Braised Short Rib", desc:"Root vegetable mash, red wine jus", price:28 },
-    { id:"m2", name:"Brown Butter Gnocchi", desc:"Sage, crispy pancetta, parmesan", price:22 },
-    { id:"m3", name:"Pan-Seared Salmon", desc:"Charred leeks, lemon beurre blanc", price:26 },
-    { id:"m4", name:"Roasted Half Chicken", desc:"Herb jus, fingerling potatoes", price:24 },
-    { id:"m5", name:"Wild Mushroom Risotto", desc:"Truffle oil, aged pecorino · v", price:21 },
-  ]},
-  { cat: "Sides", sub: "to share", items: [
-    { id:"sd1", name:"Garlic Herb Fries", desc:"", price:6 },
-    { id:"sd2", name:"Charred Broccolini", desc:"Chili flake, lemon", price:7 },
-    { id:"sd3", name:"Creamed Spinach", desc:"", price:7 },
-  ]},
-  { cat: "Desserts", sub: "a slow finish", items: [
-    { id:"d1", name:"Warm Chocolate Fondant", desc:"Vanilla bean ice cream", price:10 },
-    { id:"d2", name:"Brown Butter Apple Tart", desc:"Salted caramel", price:9 },
-    { id:"d3", name:"Affogato", desc:"Espresso, vanilla gelato", price:7 },
-  ]},
-  { cat: "Drinks", sub: "", items: [
-    { id:"w1", name:"House Red or White (glass)", desc:"", price:10 },
-    { id:"w2", name:"Old Fashioned", desc:"", price:13 },
-    { id:"w3", name:"Sparkling Elderflower Soda", desc:"", price:5 },
-    { id:"w4", name:"Still or Sparkling Water", desc:"", price:3 },
   ]},
 ];
-const ITEM_INDEX = {};
-MENU.forEach(cat => cat.items.forEach(it => ITEM_INDEX[it.id] = it));
+
+async function loadMenu(){
+  try{
+    const res = await fetch('menu.csv', { cache: 'no-store' });
+    if(!res.ok) throw new Error('menu.csv not found');
+    const text = await res.text();
+    const parsed = Papa.parse(text, { header:true, skipEmptyLines:true });
+    if(!parsed.data.length) throw new Error('menu.csv is empty');
+
+    const byCategory = {};
+    const order = [];
+    parsed.data.forEach((row, i) => {
+      const catName = (row.category || 'Menu').trim();
+      if(!byCategory[catName]){
+        byCategory[catName] = { cat: catName, sub: (row.category_note||'').trim(), items: [] };
+        order.push(catName);
+      }
+      const price = parseFloat(row.price);
+      const id = 'item' + i;
+      const item = {
+        id,
+        name: (row.name||'').trim(),
+        desc: (row.description||'').trim(),
+        price: isNaN(price) ? 0 : price,
+      };
+      byCategory[catName].items.push(item);
+      ITEM_INDEX[id] = item;
+    });
+    MENU = order.map(name => byCategory[name]);
+  }catch(err){
+    console.error('Falling back to built-in menu:', err);
+    MENU = FALLBACK_MENU;
+    ITEM_INDEX = {};
+    MENU.forEach(cat => cat.items.forEach(it => ITEM_INDEX[it.id] = it));
+  }
+}
 
 /* ---------------- State ---------------- */
 let cart = {}; // id -> qty
@@ -523,7 +535,7 @@ let showDoneOrders = false;
 const KITCHEN_EMAIL = "jiayeye28@gmail.com";
 
 /* ---------------- Init ---------------- */
-function init(){
+async function init(){
   const params = new URLSearchParams(window.location.search);
   const n = params.get('name');
   if(n){
@@ -531,6 +543,8 @@ function init(){
     document.getElementById('nameChip').style.display = 'inline-block';
     document.getElementById('nameChipVal').textContent = n;
   }
+  document.getElementById('menuList').innerHTML = '<div class="empty-note">Loading the menu…</div>';
+  await loadMenu();
   renderCatTabs();
   renderMenu();
   generateQR();
