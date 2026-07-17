@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Hearth — Family Menu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root{
+    --bg:#241811;
+    --bg-elev:#33241a;
+    --bg-elev-2:#40301f;
+    --gold:#d3a24e;
+    --gold-dim:#a17a3c;
+    --rust:#b8532f;
+    --rust-hover:#c96438;
+    --cream:#f3e6d0;
+    --cream-dim:#b9a48c;
+    --line:rgba(243,230,208,0.12);
+    --paper:#f0e6d2;
+    --paper-text:#2b1d14;
+    --paper-muted:#6b5a46;
+    --font-display:'Fraunces', Georgia, serif;
+    --font-body:'Inter', system-ui, sans-serif;
+    --font-mono:'IBM Plex Mono', ui-monospace, monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 600px 300px at 50% -10%, rgba(211,162,78,0.16), transparent 60%),
+      var(--bg);
+    color:var(--cream);
+    font-family:var(--font-body);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit;}
+  #app{max-width:520px;margin:0 auto;min-height:100vh;position:relative;padding-bottom:96px;}
+
+  /* ---------- Header ---------- */
+  .app-header{
+    padding:28px 20px 18px;
+    text-align:center;
+    position:relative;
+  }
+  .glow{
+    position:absolute;top:-20px;left:50%;transform:translateX(-50%);
+    width:220px;height:120px;
+    background:radial-gradient(ellipse at center, rgba(211,162,78,0.35), transparent 70%);
+    filter:blur(6px);
+    animation:flicker 5s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes flicker{
+    0%,100%{opacity:0.85; transform:translateX(-50%) scale(1);}
+    50%{opacity:1; transform:translateX(-50%) scale(1.04);}
+  }
+  @media (prefers-reduced-motion:reduce){ .glow{animation:none;} }
+  .brand{
+    font-family:var(--font-display);
+    font-size:38px;
+    font-weight:600;
+    letter-spacing:0.02em;
+    color:var(--gold);
+    margin:0;
+    position:relative;
+  }
+  .tagline{
+    font-size:13px;
+    color:var(--cream-dim);
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    margin-top:6px;
+  }
+  .table-chip{
+    display:inline-block;
+    margin-top:14px;
+    padding:6px 14px;
+    border:1px solid var(--line);
+    border-radius:100px;
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--cream-dim);
+    letter-spacing:0.05em;
+  }
+  .table-chip b{color:var(--gold);font-weight:600;}
+
+  /* ---------- Category tabs ---------- */
+  .cat-tabs{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding:4px 20px 14px;
+    position:sticky;
+    top:0;
+    background:var(--bg);
+    z-index:10;
+    scrollbar-width:none;
+  }
+  .cat-tabs::-webkit-scrollbar{display:none;}
+  .cat-tab{
+    flex:0 0 auto;
+    padding:8px 16px;
+    border-radius:100px;
+    border:1px solid var(--line);
+    background:transparent;
+    color:var(--cream-dim);
+    font-size:13px;
+    font-weight:500;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:background .15s,color .15s,border-color .15s;
+  }
+  .cat-tab.active{
+    background:var(--gold);
+    border-color:var(--gold);
+    color:#2a1c0e;
+  }
+
+  /* ---------- Menu list ---------- */
+  .menu-view{padding:0 20px;}
+  .cat-section{margin-bottom:28px;scroll-margin-top:70px;}
+  .cat-title{
+    font-family:var(--font-display);
+    font-size:22px;
+    color:var(--gold);
+    margin:0 0 4px;
+    font-weight:600;
+  }
+  .cat-sub{font-size:12px;color:var(--cream-dim);margin-bottom:14px;letter-spacing:.03em;}
+  .dish{
+    display:flex;
+    justify-content:space-between;
+    gap:14px;
+    padding:16px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .dish-info{flex:1;min-width:0;}
+  .dish-name{
+    font-family:var(--font-display);
+    font-size:17px;
+    font-weight:600;
+    color:var(--cream);
+    margin:0 0 4px;
+  }
+  .dish-desc{font-size:13px;color:var(--cream-dim);line-height:1.45;margin:0 0 8px;}
+  .dish-price{font-family:var(--font-mono);font-size:13px;color:var(--gold);}
+  .dish-action{flex:0 0 auto;display:flex;align-items:center;}
+  .add-btn{
+    background:var(--rust);
+    color:var(--cream);
+    border:none;
+    border-radius:8px;
+    width:36px;height:36px;
+    font-size:18px;
+    line-height:1;
+    cursor:pointer;
+    transition:background .15s;
+  }
+  .add-btn:hover{background:var(--rust-hover);}
+  .qty-stepper{
+    display:flex;align-items:center;gap:10px;
+    background:var(--bg-elev);
+    border-radius:8px;
+    padding:4px 8px;
+  }
+  .qty-stepper button{
+    background:none;border:none;color:var(--gold);font-size:16px;width:22px;height:22px;cursor:pointer;
+  }
+  .qty-stepper span{font-family:var(--font-mono);font-size:14px;min-width:16px;text-align:center;}
+
+  /* ---------- Floating cart bar ---------- */
+  .cart-bar{
+    position:fixed;
+    left:50%;
+    bottom:18px;
+    transform:translateX(-50%);
+    width:calc(100% - 40px);
+    max-width:480px;
+    background:var(--rust);
+    color:var(--cream);
+    border-radius:14px;
+    padding:14px 18px;
+    display:none;
+    align-items:center;
+    justify-content:space-between;
+    cursor:pointer;
+    box-shadow:0 8px 24px rgba(0,0,0,0.4);
+    z-index:20;
+  }
+  .cart-bar.show{display:flex;}
+  .cart-bar .left{font-size:14px;font-weight:600;}
+  .cart-bar .left small{display:block;font-weight:400;font-size:11px;opacity:.8;font-family:var(--font-mono);}
+  .cart-bar .right{font-family:var(--font-mono);font-size:15px;font-weight:600;}
+
+  /* ---------- Ticket component (signature element) ---------- */
+  .ticket-wrap{padding:14px 20px 30px;}
+  .ticket{
+    background:var(--paper);
+    color:var(--paper-text);
+    border-radius:4px 4px 0 0;
+    padding:22px 22px 26px;
+    position:relative;
+    box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  }
+  .ticket::after{
+    content:'';
+    position:absolute;left:0;right:0;bottom:-11px;height:22px;
+    background:
+      linear-gradient(135deg, var(--paper) 50%, transparent 50%) 0 0/16px 16px repeat-x,
+      linear-gradient(45deg, var(--paper) 50%, transparent 50%) 0 0/16px 16px repeat-x;
+  }
+  .ticket-head{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--paper-muted);
+    border-bottom:1px dashed rgba(43,29,20,0.3);
+    padding-bottom:12px;
+    margin-bottom:12px;
+    display:flex;
+    justify-content:space-between;
+  }
+  .ticket-title{
+    font-family:var(--font-display);
+    font-size:20px;
+    font-weight:600;
+    margin:0 0 14px;
+  }
+  .ticket-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    font-family:var(--font-mono);
+    font-size:13px;
+    padding:8px 0;
+    border-bottom:1px dashed rgba(43,29,20,0.18);
+    gap:10px;
+  }
+  .ticket-row .name{flex:1;color:var(--paper-text);}
+  .ticket-row .name small{display:block;font-family:var(--font-body);color:var(--paper-muted);font-size:11px;margin-top:2px;}
+  .ticket-row .amt{font-weight:600;white-space:nowrap;}
+  .ticket-qty{display:flex;align-items:center;gap:8px;margin-top:4px;}
+  .ticket-qty button{
+    background:rgba(43,29,20,0.08);
+    border:none;border-radius:5px;width:22px;height:22px;
+    font-size:13px;cursor:pointer;color:var(--paper-text);
+  }
+  .ticket-total{
+    display:flex;justify-content:space-between;
+    font-family:var(--font-mono);
+    font-size:15px;font-weight:700;
+    padding-top:14px;margin-top:6px;
+    border-top:1px solid rgba(43,29,20,0.3);
+  }
+  .empty-note{
+    text-align:center;color:var(--cream-dim);font-size:13px;padding:60px 20px;
+  }
+
+  /* ---------- Form bits ---------- */
+  .field-label{font-size:12px;color:var(--cream-dim);text-transform:uppercase;letter-spacing:.08em;margin:18px 20px 8px;}
+  .table-input-row{display:flex;gap:8px;padding:0 20px 4px;}
+  .table-input-row input[type=number]{
+    flex:1;
+    background:var(--bg-elev);
+    border:1px solid var(--line);
+    color:var(--cream);
+    border-radius:8px;
+    padding:10px 12px;
+    font-family:var(--font-mono);
+    font-size:14px;
+  }
+  .notes-box{
+    margin:0 20px 10px;
+    background:var(--bg-elev);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px 12px;
+  }
+  .notes-box textarea{
+    width:100%;background:none;border:none;color:var(--cream);font-family:var(--font-body);font-size:13px;resize:none;outline:none;
+  }
+  .primary-btn{
+    display:block;
+    width:calc(100% - 40px);
+    margin:18px 20px 6px;
+    background:var(--rust);
+    color:var(--cream);
+    border:none;
+    border-radius:10px;
+    padding:15px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background .15s;
+  }
+  .primary-btn:hover{background:var(--rust-hover);}
+  .primary-btn:disabled{background:var(--bg-elev-2);color:var(--cream-dim);cursor:not-allowed;}
+  .ghost-btn{
+    display:block;width:calc(100% - 40px);margin:8px 20px 0;
+    background:none;border:1px solid var(--line);color:var(--cream-dim);
+    border-radius:10px;padding:13px;font-size:14px;cursor:pointer;
+  }
+  .back-row{padding:16px 20px 0;}
+  .back-link{color:var(--gold);font-size:13px;background:none;border:none;cursor:pointer;font-family:var(--font-body);}
+
+  /* ---------- Confirmation ---------- */
+  .confirm-wrap{padding:30px 20px;text-align:center;}
+  .confirm-badge{
+    width:60px;height:60px;border-radius:50%;
+    background:var(--gold);color:#2a1c0e;
+    display:flex;align-items:center;justify-content:center;
+    font-size:28px;margin:0 auto 16px;
+  }
+  .confirm-heading{font-family:var(--font-display);font-size:24px;color:var(--gold);margin:0 0 6px;}
+  .confirm-sub{color:var(--cream-dim);font-size:14px;margin-bottom:22px;}
+  .order-number{font-family:var(--font-mono);font-size:13px;color:var(--cream-dim);letter-spacing:.05em;margin-bottom:18px;}
+  .order-number b{color:var(--cream);font-size:15px;}
+
+  /* ---------- Staff footer ---------- */
+  .staff-footer{
+    text-align:center;padding:26px 20px 10px;
+  }
+  .staff-toggle{background:none;border:none;color:var(--cream-dim);font-size:12px;text-decoration:underline;cursor:pointer;}
+  .staff-panel{display:none;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap;}
+  .staff-panel.show{display:flex;}
+  .staff-panel button{
+    background:var(--bg-elev);border:1px solid var(--line);color:var(--cream);
+    padding:9px 14px;border-radius:8px;font-size:12px;cursor:pointer;
+  }
+
+  /* ---------- QR setup view ---------- */
+  .qr-view{padding:20px;}
+  .qr-controls{display:flex;gap:10px;align-items:center;margin-bottom:20px;}
+  .qr-controls input{
+    width:70px;background:var(--bg-elev);border:1px solid var(--line);color:var(--cream);
+    border-radius:8px;padding:9px 10px;font-family:var(--font-mono);
+  }
+  .qr-controls button{
+    background:var(--rust);color:var(--cream);border:none;border-radius:8px;padding:10px 16px;font-size:13px;cursor:pointer;
+  }
+  .qr-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .qr-card{
+    background:var(--paper);color:var(--paper-text);border-radius:10px;
+    padding:14px;text-align:center;
+  }
+  .qr-card .qr-box{display:flex;justify-content:center;margin-bottom:8px;}
+  .qr-card .qr-label{font-family:var(--font-mono);font-size:13px;font-weight:600;}
+  .qr-card .qr-url{font-size:10px;color:var(--paper-muted);word-break:break-all;margin-top:4px;}
+
+  /* ---------- Kitchen view ---------- */
+  .kitchen-view{padding:20px;}
+  .kitchen-empty{text-align:center;color:var(--cream-dim);padding:60px 20px;font-size:13px;}
+  .order-card{
+    background:var(--bg-elev);border:1px solid var(--line);border-radius:10px;
+    padding:16px;margin-bottom:12px;
+  }
+  .order-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .order-card-table{font-family:var(--font-mono);font-size:14px;color:var(--gold);font-weight:600;}
+  .order-card-time{font-size:11px;color:var(--cream-dim);}
+  .order-card-items{font-size:13px;color:var(--cream);margin-bottom:8px;line-height:1.6;}
+  .order-card-notes{font-size:12px;color:var(--cream-dim);font-style:italic;margin-bottom:10px;}
+  .order-card-btn{
+    background:var(--gold);color:#2a1c0e;border:none;border-radius:7px;
+    padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer;
+  }
+  .kitchen-done-toggle{
+    text-align:center;color:var(--cream-dim);font-size:12px;background:none;border:none;
+    cursor:pointer;text-decoration:underline;margin:14px auto;display:block;
+  }
+
+  .view{display:none;}
+  .view.active{display:block;}
+
+  @media print{
+    body *{visibility:hidden;}
+    #print-area, #print-area *{visibility:visible;}
+    #print-area{position:absolute;top:0;left:0;width:100%;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="app-header">
+    <div class="glow"></div>
+    <h1 class="brand">Hearth</h1>
+    <div class="tagline">the family menu</div>
+    <div class="table-chip" id="nameChip" style="display:none;">Ordering as <b id="nameChipVal"></b></div>
+  </div>
+
+  <!-- MENU VIEW -->
+  <div class="view active" id="view-menu">
+    <div class="cat-tabs" id="catTabs"></div>
+    <div class="menu-view" id="menuList"></div>
+  </div>
+
+  <!-- ORDER / TICKET VIEW -->
+  <div class="view" id="view-order">
+    <div class="back-row"><button class="back-link" onclick="showView('menu')">← Back to menu</button></div>
+    <div class="ticket-wrap">
+      <div class="ticket">
+        <div class="ticket-head"><span>Hearth</span><span id="ticketDate"></span></div>
+        <div class="ticket-title">Your order</div>
+        <div id="ticketItems"></div>
+        <div class="ticket-total"><span>Total</span><span id="ticketTotal">$0.00</span></div>
+      </div>
+    </div>
+
+    <div id="nameInputSection">
+      <div class="field-label">Your name (optional)</div>
+      <div class="table-input-row">
+        <input type="text" id="nameInput" placeholder="e.g. Mom, Alex...">
+      </div>
+    </div>
+
+    <div class="field-label">Notes for the kitchen (optional)</div>
+    <div class="notes-box"><textarea id="notesInput" rows="2" placeholder="Allergies, no onions, etc."></textarea></div>
+
+    <button class="primary-btn" id="sendOrderBtn" onclick="submitOrder()">Send to kitchen</button>
+  </div>
+
+  <!-- CONFIRMATION VIEW -->
+  <div class="view" id="view-confirm">
+    <div class="confirm-wrap">
+      <div class="confirm-badge">✓</div>
+      <div class="confirm-heading">Sent to the kitchen</div>
+      <div class="confirm-sub">Sit tight — your order is on its way to the pass.</div>
+      <div class="order-number">Order <b id="confirmOrderNum"></b><span id="confirmNameWrap"> · <b id="confirmNameVal"></b></span></div>
+      <div class="ticket-wrap" style="padding:0 0 30px;">
+        <div class="ticket" id="confirmTicket"></div>
+      </div>
+      <button class="primary-btn" onclick="orderMoreClick()">Order more</button>
+    </div>
+  </div>
+
+  <!-- QR SETUP VIEW -->
+  <div class="view" id="view-qr">
+    <div class="back-row"><button class="back-link" onclick="showView('menu')">← Back to menu</button></div>
+    <div class="qr-view">
+      <div class="field-label" style="margin-left:0;">Your family menu QR code</div>
+      <p style="font-size:13px;color:var(--cream-dim);margin:0 0 18px;">Print or screenshot this and stick it on the fridge — anyone can scan it to open the menu and add their order.</p>
+      <div id="print-area">
+        <div class="qr-grid" id="qrGrid" style="grid-template-columns:1fr;max-width:220px;margin:0 auto;"></div>
+      </div>
+      <button class="ghost-btn" onclick="window.print()">Print</button>
+    </div>
+  </div>
+
+  <!-- KITCHEN VIEW -->
+  <div class="view" id="view-kitchen">
+    <div class="back-row"><button class="back-link" onclick="showView('menu')">← Back to menu</button></div>
+    <div class="kitchen-view">
+      <div class="field-label" style="margin-left:0;">Active orders</div>
+      <div id="kitchenActive"></div>
+      <button class="kitchen-done-toggle" id="kitchenDoneToggle" onclick="toggleDone()">Show completed</button>
+      <div id="kitchenDone" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- Cart bar -->
+  <div class="cart-bar" id="cartBar" onclick="showView('order')">
+    <div class="left" id="cartBarCount">0 items<small id="cartBarNames"></small></div>
+    <div class="right" id="cartBarTotal">$0.00</div>
+  </div>
+
+  <!-- Staff footer -->
+  <div class="staff-footer">
+    <button class="staff-toggle" onclick="toggleStaffPanel()">Restaurant staff & QR setup</button>
+    <div class="staff-panel" id="staffPanel">
+      <button onclick="showView('qr')">Print family menu QR code</button>
+      <button onclick="showView('kitchen')">Kitchen queue</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ---------------- Menu data ---------------- */
+const MENU = [
+  { cat: "Starters", sub: "small plates to open the table", items: [
+    { id:"s1", name:"Charred Sourdough & Whipped Ricotta", desc:"Rosemary oil, sea salt, honey drizzle", price:9 },
+    { id:"s2", name:"Blistered Shishito Peppers", desc:"Lemon aioli, flaky salt", price:8 },
+    { id:"s3", name:"Smoked Mushroom Toast", desc:"Thyme, shaved parmesan", price:11 },
+    { id:"s4", name:"Roasted Beet & Burrata", desc:"Candied walnuts, balsamic reduction", price:12 },
+  ]},
+  { cat: "Mains", sub: "from the hearth", items: [
+    { id:"m1", name:"Braised Short Rib", desc:"Root vegetable mash, red wine jus", price:28 },
+    { id:"m2", name:"Brown Butter Gnocchi", desc:"Sage, crispy pancetta, parmesan", price:22 },
+    { id:"m3", name:"Pan-Seared Salmon", desc:"Charred leeks, lemon beurre blanc", price:26 },
+    { id:"m4", name:"Roasted Half Chicken", desc:"Herb jus, fingerling potatoes", price:24 },
+    { id:"m5", name:"Wild Mushroom Risotto", desc:"Truffle oil, aged pecorino · v", price:21 },
+  ]},
+  { cat: "Sides", sub: "to share", items: [
+    { id:"sd1", name:"Garlic Herb Fries", desc:"", price:6 },
+    { id:"sd2", name:"Charred Broccolini", desc:"Chili flake, lemon", price:7 },
+    { id:"sd3", name:"Creamed Spinach", desc:"", price:7 },
+  ]},
+  { cat: "Desserts", sub: "a slow finish", items: [
+    { id:"d1", name:"Warm Chocolate Fondant", desc:"Vanilla bean ice cream", price:10 },
+    { id:"d2", name:"Brown Butter Apple Tart", desc:"Salted caramel", price:9 },
+    { id:"d3", name:"Affogato", desc:"Espresso, vanilla gelato", price:7 },
+  ]},
+  { cat: "Drinks", sub: "", items: [
+    { id:"w1", name:"House Red or White (glass)", desc:"", price:10 },
+    { id:"w2", name:"Old Fashioned", desc:"", price:13 },
+    { id:"w3", name:"Sparkling Elderflower Soda", desc:"", price:5 },
+    { id:"w4", name:"Still or Sparkling Water", desc:"", price:3 },
+  ]},
+];
+const ITEM_INDEX = {};
+MENU.forEach(cat => cat.items.forEach(it => ITEM_INDEX[it.id] = it));
+
+/* ---------------- State ---------------- */
+let cart = {}; // id -> qty
+let orderedByName = null;
+let showDoneOrders = false;
+
+const KITCHEN_EMAIL = "jiayeye28@gmail.com";
+
+/* ---------------- Init ---------------- */
+function init(){
+  const params = new URLSearchParams(window.location.search);
+  const n = params.get('name');
+  if(n){
+    orderedByName = n;
+    document.getElementById('nameChip').style.display = 'inline-block';
+    document.getElementById('nameChipVal').textContent = n;
+  }
+  renderCatTabs();
+  renderMenu();
+  generateQR();
+}
+
+/* ---------------- Menu rendering ---------------- */
+function renderCatTabs(){
+  const wrap = document.getElementById('catTabs');
+  wrap.innerHTML = MENU.map((c,i) =>
+    `<button class="cat-tab ${i===0?'active':''}" data-cat="${c.cat}" onclick="scrollToCat('${c.cat}', this)">${c.cat}</button>`
+  ).join('');
+}
+
+function scrollToCat(cat, btn){
+  document.querySelectorAll('.cat-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('cat-'+cat).scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function renderMenu(){
+  const wrap = document.getElementById('menuList');
+  wrap.innerHTML = MENU.map(c => `
+    <div class="cat-section" id="cat-${c.cat}">
+      <h2 class="cat-title">${c.cat}</h2>
+      ${c.sub ? `<div class="cat-sub">${c.sub}</div>` : ''}
+      ${c.items.map(it => renderDish(it)).join('')}
+    </div>
+  `).join('');
+}
+
+function renderDish(it){
+  const qty = cart[it.id] || 0;
+  return `
+    <div class="dish" id="dish-${it.id}">
+      <div class="dish-info">
+        <p class="dish-name">${it.name}</p>
+        ${it.desc ? `<p class="dish-desc">${it.desc}</p>` : ''}
+        <span class="dish-price">$${it.price.toFixed(2)}</span>
+      </div>
+      <div class="dish-action" id="action-${it.id}">
+        ${qty > 0 ? qtyStepperHTML(it.id, qty) : `<button class="add-btn" onclick="addItem('${it.id}')">+</button>`}
+      </div>
+    </div>
+  `;
+}
+
+function qtyStepperHTML(id, qty){
+  return `<div class="qty-stepper">
+    <button onclick="changeQty('${id}',-1)">−</button>
+    <span>${qty}</span>
+    <button onclick="changeQty('${id}',1)">+</button>
+  </div>`;
+}
+
+function addItem(id){
+  cart[id] = (cart[id]||0) + 1;
+  refreshDishAction(id);
+  refreshCartBar();
+}
+function changeQty(id, delta){
+  cart[id] = (cart[id]||0) + delta;
+  if(cart[id] <= 0) delete cart[id];
+  refreshDishAction(id);
+  refreshCartBar();
+}
+function refreshDishAction(id){
+  const el = document.getElementById('action-'+id);
+  const qty = cart[id] || 0;
+  el.innerHTML = qty > 0 ? qtyStepperHTML(id, qty) : `<button class="add-btn" onclick="addItem('${id}')">+</button>`;
+}
+
+function cartEntries(){
+  return Object.keys(cart).map(id => ({ item: ITEM_INDEX[id], qty: cart[id] })).filter(e=>e.qty>0);
+}
+function cartTotal(){
+  return cartEntries().reduce((s,e)=> s + e.item.price*e.qty, 0);
+}
+
+function refreshCartBar(){
+  const entries = cartEntries();
+  const bar = document.getElementById('cartBar');
+  if(entries.length === 0){ bar.classList.remove('show'); return; }
+  bar.classList.add('show');
+  const count = entries.reduce((s,e)=>s+e.qty,0);
+  document.getElementById('cartBarCount').innerHTML = `${count} item${count>1?'s':''}<small>${entries.map(e=>e.item.name).slice(0,2).join(', ')}${entries.length>2?'…':''}</small>`;
+  document.getElementById('cartBarTotal').textContent = '$' + cartTotal().toFixed(2);
+}
+
+/* ---------------- Order / ticket view ---------------- */
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.getElementById('cartBar').style.display = (name==='menu') ? '' : 'none';
+  if(name==='order') renderTicket();
+  if(name==='kitchen') loadKitchen();
+  if(name==='menu') refreshCartBar();
+  window.scrollTo(0,0);
+}
+
+function renderTicket(){
+  const entries = cartEntries();
+  document.getElementById('ticketDate').textContent = new Date().toLocaleDateString();
+  document.getElementById('ticketItems').innerHTML = entries.map(e => `
+    <div class="ticket-row">
+      <div class="name">${e.item.name}
+        <div class="ticket-qty">
+          <button onclick="changeQty('${e.item.id}',-1); renderTicket();">−</button>
+          <span>${e.qty}</span>
+          <button onclick="changeQty('${e.item.id}',1); renderTicket();">+</button>
+        </div>
+      </div>
+      <div class="amt">$${(e.item.price*e.qty).toFixed(2)}</div>
+    </div>
+  `).join('') || `<div class="empty-note" style="padding:20px 0;">Your ticket is empty — head back to the menu to add a dish.</div>`;
+  document.getElementById('ticketTotal').textContent = '$' + cartTotal().toFixed(2);
+
+  const inputSection = document.getElementById('nameInputSection');
+  const input = document.getElementById('nameInput');
+  if(orderedByName){
+    inputSection.style.display = 'none';
+  } else {
+    inputSection.style.display = '';
+    input.value = input.value || '';
+  }
+  document.getElementById('sendOrderBtn').disabled = entries.length === 0;
+}
+
+async function submitOrder(){
+  const entries = cartEntries();
+  if(entries.length === 0) return;
+  let name = orderedByName;
+  if(!name){
+    name = document.getElementById('nameInput').value.trim();
+  }
+  const notes = document.getElementById('notesInput').value.trim();
+  const orderId = Date.now().toString(36) + Math.floor(Math.random()*900+100);
+  const order = {
+    id: orderId,
+    name: name || 'Someone at home',
+    items: entries.map(e => ({ name: e.item.name, qty: e.qty, price: e.item.price })),
+    notes: notes,
+    total: cartTotal(),
+    status: 'pending',
+    ts: Date.now(),
+  };
+  const btn = document.getElementById('sendOrderBtn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try{
+    await window.storage.set('order:'+orderId, JSON.stringify(order), true);
+  }catch(err){
+    console.error('Storage error', err);
+  }
+  sendOrderEmail(order);
+  btn.textContent = 'Send to kitchen';
+  showConfirmation(order);
+  cart = {};
+  renderMenu();
+}
+
+function sendOrderEmail(order){
+  const lines = [];
+  lines.push('New order from: ' + order.name);
+  lines.push('');
+  order.items.forEach(it => lines.push(it.qty + 'x ' + it.name + ' — $' + (it.price*it.qty).toFixed(2)));
+  lines.push('');
+  lines.push('Total: $' + order.total.toFixed(2));
+  if(order.notes) lines.push('', 'Notes: ' + order.notes);
+  const subject = 'Hearth order — ' + order.name + ' (#' + order.id.slice(-5).toUpperCase() + ')';
+  const body = lines.join('\n');
+  const mailto = 'mailto:' + KITCHEN_EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  const link = document.createElement('a');
+  link.href = mailto;
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function showConfirmation(order){
+  document.getElementById('confirmOrderNum').textContent = '#' + order.id.slice(-5).toUpperCase();
+  document.getElementById('confirmNameVal').textContent = order.name;
+  document.getElementById('confirmTicket').innerHTML = `
+    <div class="ticket-head"><span>Hearth</span><span>${new Date(order.ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span></div>
+    <div class="ticket-title">Order #${order.id.slice(-5).toUpperCase()}</div>
+    ${order.items.map(it => `
+      <div class="ticket-row">
+        <div class="name">${it.name}<small>${it.qty} ×</small></div>
+        <div class="amt">$${(it.price*it.qty).toFixed(2)}</div>
+      </div>
+    `).join('')}
+    ${order.notes ? `<div style="font-size:12px;font-style:italic;color:var(--paper-muted);margin-top:8px;">"${order.notes}"</div>` : ''}
+    <div class="ticket-total"><span>Total</span><span>$${order.total.toFixed(2)}</span></div>
+  `;
+  showViewRaw('confirm');
+}
+function showViewRaw(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.getElementById('cartBar').style.display = 'none';
+  window.scrollTo(0,0);
+}
+function orderMoreClick(){
+  document.getElementById('notesInput').value = '';
+  showView('menu');
+}
+
+/* ---------------- QR setup view ---------------- */
+function generateQR(){
+  const grid = document.getElementById('qrGrid');
+  grid.innerHTML = '';
+  const url = window.location.origin + window.location.pathname;
+  const card = document.createElement('div');
+  card.className = 'qr-card';
+  card.innerHTML = `<div class="qr-box" id="qrbox-home"></div><div class="qr-label">Hearth family menu</div><div class="qr-url">${url}</div>`;
+  grid.appendChild(card);
+  if(window.QRCode){
+    new QRCode(card.querySelector('.qr-box'), { text: url, width:150, height:150, colorDark:'#2b1d14', colorLight:'#f0e6d2' });
+  } else {
+    card.querySelector('.qr-box').textContent = '(QR library unavailable — scan URL manually)';
+  }
+}
+
+/* ---------------- Kitchen view ---------------- */
+async function loadKitchen(){
+  const activeWrap = document.getElementById('kitchenActive');
+  const doneWrap = document.getElementById('kitchenDone');
+  activeWrap.innerHTML = '<div class="kitchen-empty">Loading orders…</div>';
+  try{
+    const listResult = await window.storage.list('order:', true);
+    const keys = (listResult && listResult.keys) || [];
+    const orders = [];
+    for(const k of keys){
+      try{
+        const res = await window.storage.get(k, true);
+        if(res && res.value) orders.push(JSON.parse(res.value));
+      }catch(e){ /* skip missing */ }
+    }
+    orders.sort((a,b)=>a.ts-b.ts);
+    const active = orders.filter(o=>o.status !== 'served');
+    const done = orders.filter(o=>o.status === 'served');
+
+    activeWrap.innerHTML = active.length ? active.map(orderCardHTML).join('') :
+      `<div class="kitchen-empty">No active orders — the queue is clear.</div>`;
+    doneWrap.innerHTML = done.length ? done.map(orderCardHTML).join('') :
+      `<div class="kitchen-empty">No completed orders yet.</div>`;
+  }catch(err){
+    activeWrap.innerHTML = `<div class="kitchen-empty">Couldn't load orders. Pull to refresh or reopen this view.</div>`;
+    console.error(err);
+  }
+}
+
+function orderCardHTML(o){
+  const time = new Date(o.ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  const itemsStr = o.items.map(it => `${it.qty}× ${it.name}`).join('<br>');
+  const doneBtn = o.status === 'served' ? '' :
+    `<button class="order-card-btn" onclick="markServed('${o.id}')">Mark complete</button>`;
+  return `
+    <div class="order-card">
+      <div class="order-card-head">
+        <span class="order-card-table">${o.name} · #${o.id.slice(-5).toUpperCase()}</span>
+        <span class="order-card-time">${time}</span>
+      </div>
+      <div class="order-card-items">${itemsStr}</div>
+      ${o.notes ? `<div class="order-card-notes">"${o.notes}"</div>` : ''}
+      ${doneBtn}
+    </div>
+  `;
+}
+
+async function markServed(id){
+  try{
+    const res = await window.storage.get('order:'+id, true);
+    if(res && res.value){
+      const order = JSON.parse(res.value);
+      order.status = 'served';
+      await window.storage.set('order:'+id, JSON.stringify(order), true);
+    }
+  }catch(e){ console.error(e); }
+  loadKitchen();
+}
+
+function toggleDone(){
+  showDoneOrders = !showDoneOrders;
+  document.getElementById('kitchenDone').style.display = showDoneOrders ? '' : 'none';
+  document.getElementById('kitchenDoneToggle').textContent = showDoneOrders ? 'Hide completed' : 'Show completed';
+}
+
+/* ---------------- Staff panel ---------------- */
+function toggleStaffPanel(){
+  document.getElementById('staffPanel').classList.toggle('show');
+}
+
+init();
+</script>
+</body>
+</html>
