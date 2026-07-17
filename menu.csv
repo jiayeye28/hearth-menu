@@ -1,27 +1,24 @@
-category,category_note,name,description,price
-Starters,small plates to open the table,Creamy Chicken Salad ??????,Tender chicken served over crisp greens with fresh vegetables and a light house dressing,9
-Starters,small plates to open the table,Crispy Chicken Wings ????,Crispy chicken wings tossed in savory house seasoning or sauce,15
-Starters,small plates to open the table,Oven-Baked Baguette ?????,Warm baked baguette with a crisp crust and soft center,5
-Mains Lunch/Dinner,from the hearth,Tomato Braised Beef Pasta ???????,Pasta tossed with tender beef in a rich slow-cooked tomato sauce,12
-Mains Lunch/Dinner,from the hearth,Pan-Seared Atlantic Salmon ????????,"Pan-seared salmon with a golden crust, served with seasonal vegetables",15
-Mains Lunch/Dinner,from the hearth,Herb-Roasted Half Chicken ?????,"Juicy half chicken roasted with garlic, herbs, and savory pan juices",10
-Mains Lunch/Dinner,from the hearth,Southwest Taco Bowl ????????,"Seasoned protein served with rice, beans, fresh vegetables, cheese, and salsa",10
-Mains Lunch/Dinner,from the hearth,Chicken Baguette Sandwich ???????,Seasoned chicken with fresh vegetables and house sauce on a toasted baguette,10
-Mains Lunch/Dinner,from the hearth,Steamed Chicken & Mushroom Plate ??????,"Tender steamed chicken served with saut�ed mushrooms in a light ginger-soy sauce, accompanied by seasonal vegetables and steamed rice",15
-Mains Breakfast,from the hearth,Breakfast Taco ????,"Warm tortilla filled with eggs, cheese, and your choice of breakfast filling (grounded beef/chicken)",5
-Mains Breakfast,from the hearth,Loaded Breakfast Burrito ??????,"Scrambled eggs, cheese, potatoes, and breakfast filling wrapped in a warm flour tortilla",9
-Mains Breakfast,from the hearth,Butter Croissant ????,Flaky French-style croissant baked until golden and buttery,5
-Mains Breakfast,from the hearth,Croissant Breakfast Sandwich ???????,Egg and melted cheese with your choice of breakfast filling on a buttery croissant,8
-Sides,to share,Garlic Parmesan Fries ???????,"Crispy fries tossed with garlic, herbs, and grated Parmesan",6
-Sides,to share,Charred Broccolini ???????,"Tender broccolini lightly charred and finished with garlic, lemon, and sea salt",7
-Desserts,a slow finish,Classic Creamed Spinach ????,Tender spinach folded into a rich and creamy savory sauce,10
-Desserts,a slow finish,Classic Tiramisu ??????,Espresso-soaked ladyfingers layered with mascarpone cream and cocoa,7
-Drinks,,Vanilla Gelato Affogato ?????????,Vanilla gelato topped with a freshly poured shot of hot espresso,8
-Drinks,,Coke Zero ????,Chilled zero-sugar Coca-Cola,1.6
-Drinks,,HEYTEA Specialty Tea ??????,A refreshing premium fruit tea inspired by HEYTEA favorites,8
-Drinks,,Sparkling Mineral Water ?????,Chilled sparkling mineral water,3
-Drinks,,Austin Gin Passion Fruit Cocktail ???????????,"A refreshing cocktail made with Austin gin, passion fruit, and citrus",13
-,,Caf� Latte ????,Fresh espresso blended with smooth steamed milk,5
-,,,,
-,,,,
+﻿category,category_note,name,description,price
+Starters,small plates to open the table,Creamy Chicken Salad 奶油鸡肉沙拉,Tender chicken served over crisp greens with fresh vegetables and a light house dressing,9
+Starters,small plates to open the table,Crispy Chicken Wings 香脆鸡翅,Crispy chicken wings tossed in savory house seasoning or sauce,15
+Starters,small plates to open the table,Oven-Baked Baguette 烤法棍面包,Warm baked baguette with a crisp crust and soft center,5
+Mains Lunch/Dinner,from the hearth,Tomato Braised Beef Pasta 番茄炖牛肉意面,Pasta tossed with tender beef in a rich slow-cooked tomato sauce,12
+Mains Lunch/Dinner,from the hearth,Pan-Seared Atlantic Salmon 香煎大西洋三文鱼,"Pan-seared salmon with a golden crust, served with seasonal vegetables",15
+Mains Lunch/Dinner,from the hearth,Herb-Roasted Half Chicken 香草烤半鸡,"Juicy half chicken roasted with garlic, herbs, and savory pan juices",10
+Mains Lunch/Dinner,from the hearth,Southwest Taco Bowl 西南风味塔可饭碗,"Seasoned protein served with rice, beans, fresh vegetables, cheese, and salsa",10
+Mains Lunch/Dinner,from the hearth,Chicken Baguette Sandwich 鸡肉法棍三明治,Seasoned chicken with fresh vegetables and house sauce on a toasted baguette,10
+Mains Lunch/Dinner,from the hearth,Steamed Chicken & Mushroom Plate 香菇蒸鸡套餐,"Tender steamed chicken served with sautéed mushrooms in a light ginger-soy sauce, accompanied by seasonal vegetables and steamed rice",15
+Mains Breakfast,from the hearth,Breakfast Taco 早餐塔可,"Warm tortilla filled with eggs, cheese, and your choice of breakfast filling (grounded beef/chicken)",5
+Mains Breakfast,from the hearth,Loaded Breakfast Burrito 丰盛早餐卷饼,"Scrambled eggs, cheese, potatoes, and breakfast filling wrapped in a warm flour tortilla",9
+Mains Breakfast,from the hearth,Butter Croissant 黄油可颂,Flaky French-style croissant baked until golden and buttery,5
+Mains Breakfast,from the hearth,Croissant Breakfast Sandwich 可颂早餐三明治,Egg and melted cheese with your choice of breakfast filling on a buttery croissant,8
+Sides,to share,Garlic Parmesan Fries 蒜香帕玛森薯条,"Crispy fries tossed with garlic, herbs, and grated Parmesan",6
+Sides,to share,Charred Broccolini 炙烤嫩西兰花苗,"Tender broccolini lightly charred and finished with garlic, lemon, and sea salt",7
+Desserts,a slow finish,Classic Tiramisu 经典提拉米苏,Espresso-soaked ladyfingers layered with mascarpone cream and cocoa,7
+Drinks,,Vanilla Gelato Affogato 香草冰淇淋阿芙佳朵,Vanilla gelato topped with a freshly poured shot of hot espresso,8
+Drinks,,Coke Zero 零度可乐,Chilled zero-sugar Coca-Cola,1.6
+Drinks,,HEYTEA Specialty Tea 喜茶特色饮品,A refreshing premium fruit tea inspired by HEYTEA favorites,8
+Drinks,,Sparkling Mineral Water 气泡矿泉水,Chilled sparkling mineral water,3
+Drinks,,Austin Gin Passion Fruit Cocktail 奥斯汀金酒百香果鸡尾酒,"A refreshing cocktail made with Austin gin, passion fruit, and citrus",13
+Drinks,,Café Latte 拿铁咖啡,Fresh espresso blended with smooth steamed milk,5
 ,,,,
