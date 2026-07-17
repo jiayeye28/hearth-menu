@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>Hearth — Vanessa Family Menu</title>
+<title>Hearth — Family Menu</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -390,7 +390,7 @@
   <div class="app-header">
     <div class="glow"></div>
     <h1 class="brand">Hearth</h1>
-    <div class="tagline">the vanessa family menu</div>
+    <div class="tagline">the family menu</div>
     <div class="table-chip" id="nameChip" style="display:none;">Ordering as <b id="nameChipVal"></b></div>
   </div>
 
@@ -422,15 +422,16 @@
     <div class="field-label">Notes for the kitchen (optional)</div>
     <div class="notes-box"><textarea id="notesInput" rows="2" placeholder="Allergies, no onions, etc."></textarea></div>
 
-    <button class="primary-btn" id="sendOrderBtn" onclick="submitOrder()">Send to kitchen</button>
+    <button class="primary-btn" id="sendVanessaBtn" onclick="submitOrder('vanessa')">Send to Vanessa</button>
+    <button class="primary-btn" id="sendAustinBtn" onclick="submitOrder('austin')" style="background:transparent;border:2px solid var(--gold);color:var(--gold);">Send to Austin</button>
   </div>
 
   <!-- CONFIRMATION VIEW -->
   <div class="view" id="view-confirm">
     <div class="confirm-wrap">
       <div class="confirm-badge">✓</div>
-      <div class="confirm-heading">Sent to the kitchen</div>
-      <div class="confirm-sub">Sit tight — your order is on its way to the pass.</div>
+      <div class="confirm-heading">Sent!</div>
+      <div class="confirm-sub" id="confirmSub">Your order is on its way.</div>
       <div class="order-number">Order <b id="confirmOrderNum"></b><span id="confirmNameWrap"> · <b id="confirmNameVal"></b></span></div>
       <div class="ticket-wrap" style="padding:0 0 30px;">
         <div class="ticket" id="confirmTicket"></div>
@@ -532,7 +533,10 @@ let cart = {}; // id -> qty
 let orderedByName = null;
 let showDoneOrders = false;
 
-const KITCHEN_EMAIL = "jiayeye28@gmail.com";
+const RECIPIENTS = {
+  vanessa: { label: "Vanessa", email: "jiayeye28@gmail.com" },
+  austin:  { label: "Austin",  email: "austinescalante7@gmail.com" },
+};
 
 /* ---------------- Init ---------------- */
 async function init(){
@@ -669,12 +673,17 @@ function renderTicket(){
     inputSection.style.display = '';
     input.value = input.value || '';
   }
-  document.getElementById('sendOrderBtn').disabled = entries.length === 0;
+  const disabled = entries.length === 0;
+  document.getElementById('sendVanessaBtn').disabled = disabled;
+  document.getElementById('sendAustinBtn').disabled = disabled;
 }
 
-async function submitOrder(){
+async function submitOrder(recipientKey){
   const entries = cartEntries();
   if(entries.length === 0) return;
+  const recipient = RECIPIENTS[recipientKey];
+  if(!recipient){ console.error('Unknown recipient', recipientKey); return; }
+
   let name = orderedByName;
   if(!name){
     name = document.getElementById('nameInput').value.trim();
@@ -684,29 +693,35 @@ async function submitOrder(){
   const order = {
     id: orderId,
     name: name || 'Someone at home',
+    recipient: recipient.label,
     items: entries.map(e => ({ name: e.item.name, qty: e.qty, price: e.item.price })),
     notes: notes,
     total: cartTotal(),
     status: 'pending',
     ts: Date.now(),
   };
-  const btn = document.getElementById('sendOrderBtn');
-  btn.disabled = true; btn.textContent = 'Sending…';
+  const vBtn = document.getElementById('sendVanessaBtn');
+  const aBtn = document.getElementById('sendAustinBtn');
+  const activeBtn = recipientKey === 'vanessa' ? vBtn : aBtn;
+  const activeLabel = activeBtn.textContent;
+  vBtn.disabled = true; aBtn.disabled = true;
+  activeBtn.textContent = 'Sending…';
   try{
     await window.storage.set('order:'+orderId, JSON.stringify(order), true);
   }catch(err){
     console.error('Storage error', err);
   }
-  sendOrderEmail(order);
-  btn.textContent = 'Send to kitchen';
+  sendOrderEmail(order, recipient);
+  activeBtn.textContent = activeLabel;
   showConfirmation(order);
   cart = {};
   renderMenu();
 }
 
-function sendOrderEmail(order){
+function sendOrderEmail(order, recipient){
   const lines = [];
   lines.push('New order from: ' + order.name);
+  lines.push('Sent to: ' + recipient.label);
   lines.push('');
   order.items.forEach(it => lines.push(it.qty + 'x ' + it.name + ' — $' + (it.price*it.qty).toFixed(2)));
   lines.push('');
@@ -714,7 +729,7 @@ function sendOrderEmail(order){
   if(order.notes) lines.push('', 'Notes: ' + order.notes);
   const subject = 'Hearth order — ' + order.name + ' (#' + order.id.slice(-5).toUpperCase() + ')';
   const body = lines.join('\n');
-  const mailto = 'mailto:' + KITCHEN_EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  const mailto = 'mailto:' + recipient.email + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
   const link = document.createElement('a');
   link.href = mailto;
   link.style.display = 'none';
@@ -726,6 +741,7 @@ function sendOrderEmail(order){
 function showConfirmation(order){
   document.getElementById('confirmOrderNum').textContent = '#' + order.id.slice(-5).toUpperCase();
   document.getElementById('confirmNameVal').textContent = order.name;
+  document.getElementById('confirmSub').textContent = 'Your order was sent to ' + order.recipient + '.';
   document.getElementById('confirmTicket').innerHTML = `
     <div class="ticket-head"><span>Hearth</span><span>${new Date(order.ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span></div>
     <div class="ticket-title">Order #${order.id.slice(-5).toUpperCase()}</div>
@@ -801,10 +817,11 @@ function orderCardHTML(o){
   const itemsStr = o.items.map(it => `${it.qty}× ${it.name}`).join('<br>');
   const doneBtn = o.status === 'served' ? '' :
     `<button class="order-card-btn" onclick="markServed('${o.id}')">Mark complete</button>`;
+  const recipientTag = o.recipient ? ` <span style="color:var(--cream-dim);font-weight:400;">→ ${o.recipient}</span>` : '';
   return `
     <div class="order-card">
       <div class="order-card-head">
-        <span class="order-card-table">${o.name} · #${o.id.slice(-5).toUpperCase()}</span>
+        <span class="order-card-table">${o.name}${recipientTag} · #${o.id.slice(-5).toUpperCase()}</span>
         <span class="order-card-time">${time}</span>
       </div>
       <div class="order-card-items">${itemsStr}</div>
